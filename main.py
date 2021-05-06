@@ -11,6 +11,7 @@ import time
 
 username = 'hackfate'
 password = 'REDACTED' # no no no
+roomnumb = 'dc7ac66f-5515-4a17-94ca-8cdad4065d17' # outdated room number
 
 def convert(unix):
     time = datetime.fromtimestamp(unix)
@@ -82,7 +83,7 @@ class mafiaConnectionold:
     def ping(self):
         return asyncio.get_event_loop().run_until_complete(self.async_ping())
 print('Preparing...')
-make = mafiaConnectionold('dc7ac66f-5515-4a17-94ca-8cdad4065d17', userresponse['id'], currentcookie)
+make = mafiaConnectionold(roomnumb, userresponse['id'], currentcookie)
 print('Starting...')
 from functools import lru_cache
 @lru_cache(maxsize=128)
