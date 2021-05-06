@@ -1,0 +1,2 @@
+# mafiaggbot
+mafia.gg bot
