@@ -13,6 +13,18 @@ username = 'hackfate'
 password = 'REDACTED' # no no no
 roomnumb = 'dc7ac66f-5515-4a17-94ca-8cdad4065d17' # outdated room number
 
+# q&a
+# q: you should add X!
+# a: i would, but its hard to work on a bot that is being used
+# q: why cant !help just display the description of all commands at once?
+# a: too many commands, mafia.gg spam detection gets triggered
+# q: why do you have a giant if/elif/else block in your bot detection?
+# a: hacked together in 4 hours, will fix soon.
+# q: where is the source code for this bot?
+# a: you're looking at it right now, it also displays every time on !help.
+# q: how do you even pronouce or shorten your username?
+# a: otesunki is the toki pona translation of oderjunkie, oder is the clear shortening of oderjunkie, therefore ote is the clearest shortening of otesunki.
+
 def convert(unix):
     time = datetime.fromtimestamp(unix)
     return '{0}:{1:2}:{2:2}'.format(time.hour, time.minute, time.second).replace(' ', '0')
