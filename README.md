@@ -12,6 +12,9 @@ mafia.gg bot
 ||
 |https://mafia.gg/api/users/USERID||{id: USERID, username: USERNAME, activepatreon: true/false, createdAt: 'yyyy-mm-ddThh:mm:ss:pppZ'}|get data about specific user, specifically id, username, activePatreon, createdAt|
 |https://mafia.gg/api/decks?filter&page=PAGENUM||{pagination: {page: PAGENUM, numPages: 12, total: 290}, decks: [{name: DECKNAME, version: VERSION, key: DECKID, builtin: true/false, deckSize: int, uploadTimestamp: UNIXTIMESTAMP, sampleCharacters: [{playerId: int, name: str, avatarUrl: str, backgroundColor: '#rrggbb'}]}]}|get data about all decks on specific page|
+|https://mafia.gg/api/decks/DECKID||{name: DECKNAME, version: VERSION,key: DECKID, builtin: true/false, deckSize: int, uploadTimestamp: UNIXTIMESTAMP, characters: [{playerId: PLAYERID, name: str, avatarUrl: str, backgroundColor: '#rrggbb'}]}|get data about a specific deck|
+
+https://mafia.gg/api/decks/1620620346457
 ### websocket packets
 ???s are the parts i haven't figured out yet.
 |type|data (from server)|data (to server)|usage|
@@ -35,7 +38,7 @@ mafia.gg bot
 |type|format|usage|
 |----|------|-----|
 |USERID|str|use with the users api to find name|
-|PLAYERID|str|???|
+|PLAYERID|str|use the decks api, and find the card with the playerid|
 |ROOMID|str|use with the rooms api|
 |UNIXTIMESTAMP|int|the unix time stamp|
 |MESSAGE|str|a message|
