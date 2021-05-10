@@ -1,8 +1,12 @@
-from websockets import connect
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
 from urllib.parse import unquote as unurl
 from bs4 import BeautifulSoup as bs4
+from ttkthemes import ThemedTk
+from websockets import connect
 from json import loads, dumps
 from datetime import datetime
+import tkinter.ttk as ttk
 from random import choice
 import requests as rq
 from sys import exit
@@ -12,7 +16,7 @@ import asyncio
 import typing
 import time
 
-username, password, room = 'hackfate', 'REDACTED', None # no pass 4 u, also set the room to whatever the roomid is if you started the room before the bot.
+username, password, room = 'hackfate', 'REDACTED', None # no pass 4 u
 auth = [username, 'Otesunkie'] # bot acc first, main acc for host second, then alts for host, then other people given auth.
 
 def convert(unix):
@@ -49,144 +53,18 @@ def finddude(i: int) -> str:
         The username."""
     return loads(rq.get('https://mafia.gg/api/users/{}'.format(i)).content)[0]['username']
 
-def parsepacketsimple(packet: dict):
+def parsepacketsimple(packet: dict, parsing: bool):
+    if not packet:
+        return
     if packet['type']=='chat':
         name = '???'
         if packet['from']['model'] == 'user':
             name = finddude(packet['from']['userId'])
-            gui.playerAdd(name)
-        gui.chat(convert(packet['timestamp']), name, packet['message'])
+            if parsing:
+                gui.playerAdd(name)
+        if parsing:
+            gui.chat(packet['timestamp'], name, packet['message'])
 
-class App():
-    def __init__(self, *args, **kwargs):
-        self.root = tk.Tk()
-        root = self.root
-        self.filter = False
-        #tk.Label(self, text='Hello, World!').pack()
-        root.title('Bot Control Panel')
-        root.geometry('640x480')
-        left = tk.Frame(root)
-        right = tk.Frame(root)
-        buttons = tk.Frame(left)
-        buttons.pack(side = tk.TOP, fill = tk.X)
-        left.pack(side = tk.LEFT, fill = tk.Y)
-        right.pack(side = tk.RIGHT, expand = True, fill = tk.BOTH)
-        #tk.Button(root, text='!', width=7, height=2, command=self.activateFilter)\
-        #  .grid(padx=3, pady=3)
-        #tk.Button(root, text='...', width=7, height=2, command=self.disableFilter)\
-        #  .grid(column=1, row=0, padx=3, pady=3)
-        #tk.Listbox(root)\
-        #  .grid(column=0, row=1, columnspan=2, padx=3, pady=3)
-        #tk.Listbox(root)\
-        #  .grid(column=2, row=0, rowspan=2, padx=3, pady=3)
-        tk.Button(buttons, text='!', width=7, height=2, command=self.activateFilter)\
-          .pack(side = tk.LEFT)
-        tk.Button(buttons, text='...', width=7, height=2, command=self.disableFilter)\
-          .pack(side = tk.RIGHT)
-        self.playerslist = tk.Listbox(left)
-        self.playerslist.pack(side = tk.BOTTOM, expand = True, fill = tk.BOTH)
-        self.entrybox = tk.Entry(right)
-        self.entrybox.pack(side = tk.BOTTOM, fill = tk.X)
-        self.chatlist = tk.Listbox(right)
-        self.chatlist.pack(side = tk.TOP, expand = True, fill = tk.BOTH)
-    def activateFilter(self):
-        self.filter = True
-        print('Filter activated')
-    def disableFilter(self):
-        self.filter = False
-        print('Filter disabled')
-    def playerAdd(self, name):
-        if name not in self.playerslist.get(0, tk.END):
-            self.playerslist.insert(tk.END, name)
-    def playerRemove(self, name):
-        self.playerslist.delete(self.playerslist.get(0, tk.END).index(name))
-    def chat(self, time, name, message):
-        self.chatlist.insert(tk.END, '{}  {}: {}'.format(time, name, message))
-    def system(self, time, message):
-        self.chatlist.insert(tk.END, '{}  {}'.format(time, message))
-    def mainloop(self, *args, **kwargs):
-        return self.root.mainloop(*args, **kwargs)
-
-gui = App()
-
-# q&a
-# q: you should add X!
-# a: ok!
-# q: why cant !help just display the description of all commands at once?
-# a: too many commands, mafia.gg spam detection gets triggered
-# q: why do you have a giant if/elif/else block in your bot detection?
-# a: hacked together in 4 hours, will fix soon.
-# q: where is the source code for this bot?
-# a: you're looking at it right now, it also displays every time on !help.
-# q: how do you even pronouce or shorten your username?
-# a: otesunki is the toki pona translation of oderjunkie, oder is the clear shortening of oderjunkie, therefore ote is the clearest shortening of otesunki.
-
-#class mafiaConnection(WebSocketClientProtocol):
-#    pass
-class mafiaConnectionold:
-    def __init__(self, roomId, userId, cookies):
-        #self.coroutine()
-        async def init_async(roomId, userId, cookies):
-            self.roomId = roomId
-            self.userId = userId
-            self.settings = loads(rq.get('https://mafia.gg/api/rooms/{}'.format(self.roomId), cookies=cookies).content)
-            #print(self.settings)
-            self.ws = await connect(self.settings['engineUrl'], ssl=True) # 'wss://echo.websocket.org/'    self.settings['engineUrl']   , sslopt={'cert_reqs': ssl.CERT_NONE}
-            #print(self.ws)
-            output = dumps({'type':'clientHandshake', 'userId':userId, 'roomId':roomId, 'auth': self.settings['auth']})
-            #print(output)
-            await self.ws.send(output)
-            self.info = loads(await self.ws.recv())
-            self.users = self.info['users']
-            #print(self.info)
-            #players_raw = find(lambda x: x['type']=='startGame', self.info['events'])
-            #if players_raw!=None:
-            #    players_raw = player_raw['players']
-            #except KeyError:
-            #    players_raw = [x['userid'] for x in self.info['users']]
-            #print(players_raw)
-            #self.players = {k:v for y in [{x['playerId']: {'name': x['name'], 'color': x['backgroundColor']}} for x in players_raw] for k,v in y.items()} #, 'avatar': x['avatarUrl']
-            #for key, value in zip(self.players.keys(), self.players.values()):
-            #    print(key, value)
-            #tmp = self.info
-            #del tmp['events']
-            #print(tmp)
-        self.eventloop = None
-        try:
-            self.eventloop = asyncio.get_event_loop()
-        except RuntimeError:
-            self.eventloop = asyncio.new_event_loop()
-            asyncio.set_event_loop(self.eventloop)
-        self.eventloop.run_until_complete(init_async(roomId, userId, cookies))
-        #return None
-    async def async_send_chat(self, message):
-        await self.ws.send(dumps({'type': 'chat', 'message': message}))
-        recv = loads(await self.ws.recv())
-        self.info['events'].append(recv)
-        return recv
-    def sendchat(self, message):
-        returned = self.eventloop.run_until_complete(self.async_send_chat(message))
-        parsepacketsimple(returned)
-        return returned
-    async def async_sendpacket(self, packet):
-        await self.ws.send(dumps(packet))
-        return loads(await self.ws.recv())
-    def sendpacket(self, packet):
-        #print(packet)
-        return self.eventloop.run_until_complete(self.async_sendpacket(packet))
-    async def async_get(self):
-        return loads(await self.ws.recv())
-    def get(self):
-        return self.eventloop.run_until_complete(self.async_get())
-    def whois(self, model):
-        return self.players[model['userId']]
-    async def async_ping(self):
-        await self.ws.send('{"type":"ping"}')
-        return loads(await self.ws.recv())
-    def ping(self):
-        return self.eventloop.run_until_complete(self.async_ping())
-    def close(self):
-        return self.eventloop.run_until_complete(self.ws.close())
 class Interact:
     undoopts = {'dayLength': 3, 'dayStart': 'off',
                 'deadlockPreventionLimit': '-1', 'deck': '-1',
@@ -330,7 +208,7 @@ class Interact:
         #if room==None:
         #    room = Interact.randomroomid()
         make.sendpacket({'type': 'newGame', 'roomId': room})
-        make = mafiaConnectionold(room, make.userId, currentcookie)
+        make = mafiaConnectionold(room, make.userId, currentcookie, True)
         Interact.options = next(filter(lambda x:x['type']=='options', make.info['events'][::-1]))
         sleep(1)
         Interact.talk('Hello, World!')
@@ -345,7 +223,7 @@ class Interact:
             pass
     def newroomat(roomid: str):
         make.sendpacket({'type': 'newGame', 'roomId': roomid})
-        make = mafiaConnectionold(roomid, make.userId, currentcookie)
+        make = mafiaConnectionold(roomid, make.userId, currentcookie, True)
     def forcespec():
         """forcespec()
 
@@ -361,6 +239,94 @@ class Interact:
 
         Makes the bot a spectator."""
         make.sendpacket({'type': 'presence', 'isPlayer': False})
+
+# q&a
+# q: you should add X!
+# a: ok!
+# q: why cant !help just display the description of all commands at once?
+# a: too many commands, mafia.gg spam detection gets triggered
+# q: why do you have a giant if/elif/else block in your bot detection?
+# a: hacked together in 4 hours, will fix soon.
+# q: where is the source code for this bot?
+# a: you're looking at it right now, it also displays every time on !help.
+# q: how do you even pronouce or shorten your username?
+# a: otesunki is the toki pona translation of oderjunkie, oder is the clear shortening of oderjunkie, therefore ote is the clearest shortening of otesunki.
+
+#class mafiaConnection(WebSocketClientProtocol):
+#    pass
+class mafiaConnectionold:
+    def __init__(self, roomId, userId, cookies, parsing):
+        #self.coroutine()
+        async def init_async(roomId, userId, cookies, parsing):
+            self.roomId = roomId
+            self.userId = userId
+            self.parsing = parsing
+            self.settings = loads(rq.get('https://mafia.gg/api/rooms/{}'.format(self.roomId), cookies=cookies).content)
+            #print(self.settings)
+            self.ws = await connect(self.settings['engineUrl'], ssl=True) # 'wss://echo.websocket.org/'    self.settings['engineUrl']   , sslopt={'cert_reqs': ssl.CERT_NONE}
+            #print(self.ws)
+            output = dumps({'type':'clientHandshake', 'userId':userId, 'roomId':roomId, 'auth': self.settings['auth']})
+            #print(output)
+            await self.ws.send(output)
+            self.info = loads(await self.ws.recv())
+            self.users = self.info['users']
+            #print(self.info)
+            #players_raw = find(lambda x: x['type']=='startGame', self.info['events'])
+            #if players_raw!=None:
+            #    players_raw = player_raw['players']
+            #except KeyError:
+            #    players_raw = [x['userid'] for x in self.info['users']]
+            #print(players_raw)
+            #self.players = {k:v for y in [{x['playerId']: {'name': x['name'], 'color': x['backgroundColor']}} for x in players_raw] for k,v in y.items()} #, 'avatar': x['avatarUrl']
+            #for key, value in zip(self.players.keys(), self.players.values()):
+            #    print(key, value)
+            #tmp = self.info
+            #del tmp['events']
+            #print(tmp)
+        self.eventloop = None
+        try:
+            self.eventloop = asyncio.get_running_loop()
+        except RuntimeError:
+            self.eventloop = asyncio.new_event_loop()
+            asyncio.set_event_loop(self.eventloop)
+        self.eventloop.run_until_complete(init_async(roomId, userId, cookies, parsing))
+        #return None
+    async def async_send_chat(self, message):
+        await self.ws.send(dumps({'type': 'chat', 'message': message}))
+        try:
+            recv = loads(await asyncio.wait_for(
+                self.ws.recv(),
+                timeout = 1.0
+            ))
+            self.info['events'].append(recv)
+            return recv
+        except asyncio.TimeoutError:
+            return None
+    def sendchat(self, message):
+        returned = self.eventloop.run_until_complete(self.async_send_chat(message))
+        import time
+        time.sleep(1) # RACE CONDITIOOOOOOOOOOOOOOOOOON
+        parsepacketsimple(returned, self.parsing)
+        return returned
+    async def async_sendpacket(self, packet):
+        await self.ws.send(dumps(packet))
+        return loads(await self.ws.recv())
+    def sendpacket(self, packet):
+        #print(packet)
+        return self.eventloop.run_until_complete(self.async_sendpacket(packet))
+    async def async_get(self):
+        return loads(await self.ws.recv())
+    def get(self):
+        return self.eventloop.run_until_complete(self.async_get())
+    def whois(self, model):
+        return self.players[model['userId']]
+    async def async_ping(self):
+        await self.ws.send('{"type":"ping"}')
+        return loads(await self.ws.recv())
+    def ping(self):
+        return self.eventloop.run_until_complete(self.async_ping())
+    def close(self):
+        return self.eventloop.run_until_complete(self.ws.close())
 print('Preparing...')
 #make = mafiaConnectionold(roomid, userresponse['id'], currentcookie)
 if not room:
@@ -369,7 +335,10 @@ if not room:
 #room = 'ed7e72b5-cc44-4e47-9207-a105a1ef6bf0'
 #room = '8ecd46b7-f9f6-4c6b-9896-549f26f29846'
 #room = '699109eb-c59a-46b3-a36f-2d21d45c9168'
-make = mafiaConnectionold(room, userresponse['id'], currentcookie)
+make = mafiaConnectionold(room, userresponse['id'], currentcookie, True)
+make2 = mafiaConnectionold(room, userresponse['id'], currentcookie, False)
+for event in make.info['events']:
+    parsepacketsimple(event, True)
 print('Started bot up at {}'.format(room))
 Interact.options = next(filter(lambda x:x['type']=='options', make.info['events'][::-1]))
 print('Starting...')
@@ -801,13 +770,14 @@ SOURCE: https://github.com/Oderjunkie/mafiaggbot/blob/main/main.py
             Interact.talk('Sorry {}, You\'re not {}!'.format(name, auth[1]))
     def on__(name: str, command: str, args: typing.List[str]):
         Interact.talk('{}? What?'.format(command[1:]))
+        
 def parsepacket(packet: dict, cookies: dict, bot: typing.Any):
     if packet['type']=='chat':
         name = '???'
         if packet['from']['model'] == 'user':
             name = finddude(packet['from']['userId'])
             gui.playerAdd(name)
-        gui.chat(convert(packet['timestamp']), name, packet['message'])
+        gui.chat(packet['timestamp'], name, packet['message'])
         filtered = bot.filterCommand(packet['message'])
         if filtered!=None:
             bot.onCommand(name, filtered[0], filtered[1:])
@@ -838,9 +808,10 @@ def parsepacket(packet: dict, cookies: dict, bot: typing.Any):
         #print(packet)
         #pass
 def debug(cli: typing.Any, cookies: dict):
-    Interact.talk('Hello, World!')
-    Bot.onCommand(auth[0], '!help', [])
     import time
+    Interact.talk('Hello, World!')
+    time.sleep(0.01)
+    Bot.onCommand(auth[0], '!help', [])
     while True:
         try:
             time.sleep(0.01)
@@ -863,15 +834,87 @@ def debug(cli: typing.Any, cookies: dict):
         #print(repr(got))
 #for event in make.info['events']:
     #parsepacket(event, currentcookie)
+
+class App():
+    def __init__(self, *args, **kwargs):
+        self.root = ThemedTk(theme='black')
+        root = self.root
+        self.filter = False
+        #tk.Label(self, text='Hello, World!').pack()
+        root.title('Bot Control Panel')
+        root.geometry('640x480')
+        left = ttk.Frame(root)
+        right = ttk.Frame(root)
+        buttons = ttk.Frame(left)
+        buttons.pack(side = tk.TOP, fill = tk.X)
+        left.pack(side = tk.LEFT, fill = tk.Y)
+        right.pack(side = tk.RIGHT, expand = True, fill = tk.BOTH)
+        #tk.Button(root, text='!', width=7, height=2, command=self.activateFilter)\
+        #  .grid(padx=3, pady=3)
+        #tk.Button(root, text='...', width=7, height=2, command=self.disableFilter)\
+        #  .grid(column=1, row=0, padx=3, pady=3)
+        #tk.Listbox(root)\
+        #  .grid(column=0, row=1, columnspan=2, padx=3, pady=3)
+        #tk.Listbox(root)\
+        #  .grid(column=2, row=0, rowspan=2, padx=3, pady=3)
+        ttk.Button(buttons, text='!', width=7, command=self.activateFilter)\
+          .pack(side = tk.LEFT)
+        ttk.Button(buttons, text='...', width=7, command=self.disableFilter)\
+          .pack(side = tk.RIGHT)
+        self.playerslist = tk.Listbox(left)
+        self.playerslist.pack(side = tk.BOTTOM, expand = True, fill = tk.BOTH)
+        self.entrybox = ttk.Entry(right)
+        self.entrybox.pack(side = tk.BOTTOM, fill = tk.X)
+        self.entrybox.bind('<Return>', self.chatoutput)
+        scroll = ttk.Scrollbar(right)
+        scroll.pack(side = tk.RIGHT, fill = tk.Y)
+        self.chatlist = tk.Listbox(right, yscrollcommand = scroll.set)
+        self.chatlist.pack(side = tk.TOP, expand = True, fill = tk.BOTH)
+        scroll.config(command = self.chatlist.yview)
+        self.chats = []
+    def activateFilter(self):
+        self.filter = True
+        print('Filter activated')
+    def disableFilter(self):
+        self.filter = False
+        print('Filter disabled')
+    def playerAdd(self, name):
+        if name not in self.playerslist.get(0, tk.END):
+            self.playerslist.insert(tk.END, name)
+    def playerRemove(self, name):
+        self.playerslist.delete(self.playerslist.get(0, tk.END).index(name))
+    def chat(self, timestamp, name, message):
+        #print(self.chats)
+        self.chats.append([timestamp, name, message])
+        #for chat in self.chats:
+        #    if type(chat[0])!=int:
+        #        print(chat)
+        self.chats.sort(key=lambda x:x[0]) # RACE CONDITIONS SUCK
+        index = next(filter(lambda x:x[1][0]==timestamp, enumerate(self.chats)))[0]
+        self.chatlist.insert(index, '{}  {}: {}'.format(convert(timestamp), name, message))
+        self.chatlist.yview_moveto(1)
+    def chatoutput(self, message):
+        make2.sendchat(self.entrybox.get())
+        self.entrybox.delete(0, tk.END)
+    def system(self, time, message):
+        self.chatlist.insert(tk.END, '{}  {}'.format(time, message))
+        self.chatlist.yview_moveto(1)
+    def mainloop(self, *args, **kwargs):
+        return self.root.mainloop(*args, **kwargs)
+
 print('Setting up GUI...')
+
+gui = App()
 
 for user in make.info['users']:
     gui.playerAdd(finddude(user['userId']))
 
 print('Complete!')
 
-threading.Thread(target=debug, args=(make, currentcookie)).start()
+threading.Thread(target=debug, args=(make, currentcookie), daemon=True).start()
 gui.mainloop()
+Interact.talk('I have been shut down.')
+make.close()
 
 #submitter = [{'type': 'clientHandshake', 'userId': userresponse['id'], 'roomId': roomId, 'auth': make.settings['auth']}]
 #submitter = dumps([dumps(x) for x in submitter])
