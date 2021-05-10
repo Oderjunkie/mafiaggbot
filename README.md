@@ -4,14 +4,14 @@ mafia.gg bot
 - add tkinter ui on a different thread than the api fetch bot thing \[async threading sucks btw\]
 ## reverse engineering
 ### api
-|url|post data|usage|
-|---|---------|-----|
-|https://mafia.gg/api/user-session|{login, password}|used to login to an account, use the cookies|
-|https://mafia.gg/api/rooms||get list of all rooms|
-|https://mafia.gg/api/rooms/ROOMID||get data about specific room, engineUrl is the engine url, auth is the authentication token|
+|url|post data|get data|usage|
+|---|---------|--------|-----|
+|https://mafia.gg/api/user-session|{login, password}|{id: USERID, username: USERNAME, email: EMAIL, hostBannedUsernames: [???], isPatreonLinked: true/false, activePatreon: true/false, needsVerification: true/false, createdAt: 'yyyy-mm-ddThh:mm:ss:pppZ'}|used to login to an account, use the cookies|
+|https://mafia.gg/api/rooms||[{id: ROOMID, name: ROOMNAME, hasStarted: true/false, playerCount: int, setupSize: 12, hostUser: {id: USERID, username: USERNAME, activepatreon: true/false, createdAt: 'yyyy-mm-ddThh:mm:ss:pppZ'}, createdAt: 'yyyy-mm-ddThh:mm:ss:pppZ'}]|get list of all rooms|
+|https://mafia.gg/api/rooms/ROOMID||{engineUrl: URL, auth: AUTH}|get data about specific room, URL is the engine url, AUTH is the authentication token|
 ||
-|https://mafia.gg/api/users/USERID||get data about specific user, specifically id, username, activePatreon, createdAt|
-|https://mafia.gg/api/decks?filter&page=PAGENUM||get data about all decks on specific page|
+|https://mafia.gg/api/users/USERID|||get data about specific user, specifically id, username, activePatreon, createdAt|
+|https://mafia.gg/api/decks?filter&page=PAGENUM|||get data about all decks on specific page|
 ### websocket packets
 ???s are the parts i haven't figured out yet.
 |type|data (from server)|data (to server)|usage|
