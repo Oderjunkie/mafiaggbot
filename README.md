@@ -1,9 +1,26 @@
 # mafiaggbot
 mafia.gg bot
 ## plans
-- add tkinter ui on a different thread than the api fetch bot thing \[async threading sucks btw\]
+- [COMPLETED] add tkinter ui on a different thread than the api fetch bot thing \[async threading sucks btw\]
 ## reverse engineering
-### api
+### process
+#### api
+open up chrome devtools using F12, use Ctrl+F5 to refresh the page and cache, go into the devtools and click on network, you should see something like this:
+![image](https://user-images.githubusercontent.com/58880677/118372522-b7f89c00-b5ba-11eb-99d3-68421c12be0f.png)
+right now, the only thing that you should be looking at is that "rooms" request, click on it and you'll see
+![image](https://user-images.githubusercontent.com/58880677/118372556-f4c49300-b5ba-11eb-83d0-b98ade32d263.png)
+you can ignore the general and response headers sections, look at the request headers (in this case you can ignore it, but thats the exception to the rule,) another thing you should look at is the response, click preview
+![image](https://user-images.githubusercontent.com/58880677/118372624-55ec6680-b5bb-11eb-9432-609304fbd944.png)
+as you can see, those are all the rooms you can see on the page, in json format! this is how i figured out all the ordinary api requests.
+#### websocket packets
+same as with api, but you must enter a game first, and you'll see this:
+![image](https://user-images.githubusercontent.com/58880677/118372703-9c41c580-b5bb-11eb-8368-dc5a2dfeff37.png)
+the "engine" request is the only important thing here. click on it.
+
+you can ignore the headers for all websocket packets, just click on messages and you'll see this:
+![image](https://user-images.githubusercontent.com/58880677/118372763-d14e1800-b5bb-11eb-96d5-7cfdda611b4e.png)
+each of these rows is a different packet: red arrows pointing down are the packets from the server, to the client; green arrows pointing up are the packets from the client, to the server.
+### api documentation
 |url|post data|get data|usage|
 |---|---------|--------|-----|
 |https://mafia.gg/api/user-session|{login, password}|{id: USERID, username: USERNAME, email: EMAIL, hostBannedUsernames: [???], isPatreonLinked: true/false, activePatreon: true/false, needsVerification: true/false, createdAt: 'yyyy-mm-ddThh:mm:ss:pppZ'}|used to login to an account, use the cookies|
@@ -14,7 +31,7 @@ mafia.gg bot
 |https://mafia.gg/api/decks?filter&page=PAGENUM||{pagination: {page: PAGENUM, numPages: 12, total: 290}, decks: [{name: DECKNAME, version: VERSION, key: DECKID, builtin: true/false, deckSize: int, uploadTimestamp: UNIXTIMESTAMP, sampleCharacters: [{playerId: int, name: str, avatarUrl: str, backgroundColor: '#rrggbb'}]}]}|get data about all decks on specific page|
 |https://mafia.gg/api/decks/DECKID||{name: DECKNAME, version: VERSION,key: DECKID, builtin: true/false, deckSize: int, uploadTimestamp: UNIXTIMESTAMP, characters: [{playerId: PLAYERID, name: str, avatarUrl: str, backgroundColor: '#rrggbb'}]}|get data about a specific deck|
 
-### websocket packets
+### websocket packets documentation
 ???s are the parts i haven't figured out yet.
 |type|data (from server)|data (to server)|usage|
 |----|------------------|----------------|-----|
