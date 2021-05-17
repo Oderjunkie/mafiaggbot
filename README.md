@@ -34,6 +34,8 @@ scroll to the bottom.
 |timer|{end: UNIXTIMESTAMP, timestamp: UNIXTIMESTAMP, topic: TOPIC}||the topic is stuff like "Free period", "End-of-night buffer" and such|
 |quote|{qid: ???, timestamp: UNIXTIMESTAMP, from: {model: 'user'/'player', userId: USERID/0, playerId: PLAYERID}}||quotes in the chat|
 |death|{playerId: PLAYERID, timestamp: UNIXTIMESTAMP}||death|
+|userJoin|{userId: USERID, timestamp: UNIXTIMESTAMP}||a user joining|
+|userQuit|{userId: USERID, timestamp: UNIXTIMESTAMP}||a user exiting|
 #### explanation of some types
 |type|format|usage|
 |----|------|-----|
