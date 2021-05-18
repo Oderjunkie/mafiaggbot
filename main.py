@@ -6,8 +6,8 @@ from ttkthemes import ThemedTk
 from websockets import connect
 from json import loads, dumps
 from datetime import datetime
-import tkinter.ttk as ttk
 from random import choice
+import tkinter.ttk as ttk
 import requests as rq
 from sys import exit
 import tkinter as tk
@@ -56,23 +56,29 @@ def finddude(i: int) -> str:
 def parsepacketsimple(packet: dict, parsing: bool):
     if not packet:
         return
+    print(packet['type'])
     if packet['type']=='chat':
         name = '???'
         if packet['from']['model'] == 'user':
             name = finddude(packet['from']['userId'])
-            if parsing:
-                gui.playerAdd(name)
+            #if parsing:
+            #    gui.playerAdd(name)
         if parsing:
             gui.chat(packet['timestamp'], name, packet['message'])
+    elif packet['type']=='userJoin':
+        gui.playerAdd(finddude(packet['userId']))
+    elif packet['type']=='userQuit':
+        gui.playerRemove(finddude(packet['userId']))
 
 class Interact:
+    playing = False
     undoopts = {'dayLength': 3, 'dayStart': 'off',
                 'deadlockPreventionLimit': '-1', 'deck': '-1',
                 'disableVoteLock': False, 'hideSetup': False,
                 'hostRoleSelection': False, 'majorityRule': '51',
                 'mustVote': False, 'nightLength': 1, 'noNightTalk': False,
                 'revealSetting': 'allReveal', 'roles': {},
-                'roomName': 'The Self-hosting server.', 'scaleTimer': True, 'twoKp': '0',
+                'roomName': 'The Self-hosting server. V5.0', 'scaleTimer': True, 'twoKp': '0',
                 'type': 'options', 'unlisted': True}
     options = {'dayLength': 3, 'dayStart': 'off',
                'deadlockPreventionLimit': '-1', 'deck': '-1',
@@ -80,7 +86,7 @@ class Interact:
                'hostRoleSelection': False, 'majorityRule': '51',
                'mustVote': False, 'nightLength': 1, 'noNightTalk': False,
                'revealSetting': 'allReveal', 'roles': {},
-               'roomName': 'The Self-hosting server.', 'scaleTimer': True, 'twoKp': '0',
+               'roomName': 'The Self-hosting server. V5.0', 'scaleTimer': True, 'twoKp': '0',
                'type': 'options', 'unlisted': True}
     def talk(msg: str):
         """talk(msg)
@@ -168,6 +174,8 @@ class Interact:
         """startgame()
 
         Starts the game."""
+        Interact.playing = True
+        print('GAME HAS STARTED')
         return make.sendpacket({'type': 'startGame'})
     def undo():
         """undo()
@@ -202,13 +210,16 @@ class Interact:
             name : str - Contains the name of the new room.
             unlisted : bool - `True` or `False`, Unlisted or listed."""
         global make
+        global make2
         from time import sleep
+        Interact.playing
         room = loads(rq.post('https://mafia.gg/api/rooms', json=options, cookies=currentcookie).content)['id']
         Interact.talk('NOTE: i went to https://mafia.gg/game/{}'.format(room))
         #if room==None:
         #    room = Interact.randomroomid()
         make.sendpacket({'type': 'newGame', 'roomId': room})
         make = mafiaConnectionold(room, make.userId, currentcookie, True)
+        make2 = mafiaConnectionold(room, make.userId, currentcookie, False)
         Interact.options = next(filter(lambda x:x['type']=='options', make.info['events'][::-1]))
         sleep(1)
         Interact.talk('Hello, World!')
@@ -224,6 +235,7 @@ class Interact:
     def newroomat(roomid: str):
         make.sendpacket({'type': 'newGame', 'roomId': roomid})
         make = mafiaConnectionold(roomid, make.userId, currentcookie, True)
+        make2 = mafiaConnectionold(roomid, make.userId, currentcookie, False)
     def forcespec():
         """forcespec()
 
@@ -235,7 +247,7 @@ class Interact:
         Makes the bot a player."""
         make.sendpacket({'type': 'presence', 'isPlayer': True})
     def becomespec():
-        """becomespe()
+        """becomespec()
 
         Makes the bot a spectator."""
         make.sendpacket({'type': 'presence', 'isPlayer': False})
@@ -261,7 +273,11 @@ class mafiaConnectionold:
             self.roomId = roomId
             self.userId = userId
             self.parsing = parsing
-            self.settings = loads(rq.get('https://mafia.gg/api/rooms/{}'.format(self.roomId), cookies=cookies).content)
+            try:
+                self.settings = loads(rq.get('https://mafia.gg/api/rooms/{}'.format(self.roomId), cookies=cookies).content)
+            except:
+                print(rq.get('https://mafia.gg/api/rooms/{}'.format(self.roomId), cookies=cookies).content)
+                exit()
             #print(self.settings)
             self.ws = await connect(self.settings['engineUrl'], ssl=True) # 'wss://echo.websocket.org/'    self.settings['engineUrl']   , sslopt={'cert_reqs': ssl.CERT_NONE}
             #print(self.ws)
@@ -315,7 +331,9 @@ class mafiaConnectionold:
         #print(packet)
         return self.eventloop.run_until_complete(self.async_sendpacket(packet))
     async def async_get(self):
-        return loads(await self.ws.recv())
+        new = loads(await self.ws.recv())
+        self.info['events'].append(new)
+        return new
     def get(self):
         return self.eventloop.run_until_complete(self.async_get())
     def whois(self, model):
@@ -331,14 +349,18 @@ print('Preparing...')
 #make = mafiaConnectionold(roomid, userresponse['id'], currentcookie)
 if not room:
     room = loads(rq.post('https://mafia.gg/api/rooms', json={'name': Interact.options['roomName'], 'unlisted': Interact.options['unlisted']}, cookies=currentcookie).content)['id']
+
+#conn = mafiaConnectionold('16ff805a-89eb-4411-b7b8-a7c7452ad062', userresponse['id'], currentcookie, True)
+#conn.close()
+#exit()
+
+
 #room = 'bc6e1b01-9a58-495b-b09f-e5177f7635ef'
 #room = 'ed7e72b5-cc44-4e47-9207-a105a1ef6bf0'
 #room = '8ecd46b7-f9f6-4c6b-9896-549f26f29846'
 #room = '699109eb-c59a-46b3-a36f-2d21d45c9168'
 make = mafiaConnectionold(room, userresponse['id'], currentcookie, True)
 make2 = mafiaConnectionold(room, userresponse['id'], currentcookie, False)
-for event in make.info['events']:
-    parsepacketsimple(event, True)
 print('Started bot up at {}'.format(room))
 Interact.options = next(filter(lambda x:x['type']=='options', make.info['events'][::-1]))
 print('Starting...')
@@ -718,23 +740,35 @@ SOURCE: https://github.com/Oderjunkie/mafiaggbot/blob/main/main.py
         Interact.talk('Starting...')
         Interact.startGame()
     def on_new(name: str, args: typing.List[str]):
+        print('NEW')
+        print(Interact.playing)
+        if Interact.playing:
+            print('shh')
+            Interact.talk('Shh! The game is in progress, {}!'.format(name))
+            return
+        else:
+            try:
+                print('finding')
+                next(filter(lambda x:x['type']=='endGame', make.info['events']))
+                print('found')
+            except StopIteration:
+                print('unfound')
+                for event in make.info['events']:
+                    print(event['type'])
+                Interact.talk('The game hasn\'t started yet, {}!'.format(name))
+                return
         Interact.talk('Creating new room...')
         #if len(args)>0:
         #    Interact.newroom(args[0])
         #else:
         #    Interact.newroom()
-        if len(args)>0:
+        if len(args)>0 and name in auth:
             Interact.newroom({'name': args[0], 'unlisted': Interact.options['unlisted']})
         #else:
         #try:
         #    next(filter(lambda x:x['type']=='startGame', make.info['events']))
         #except StopIteration:
         #    Interact.talk('The game hasn\'t started yet, {}!'.format(name))
-        #    return
-        #try:
-        #    next(filter(lambda x:x['type']=='endGame', make.info['events']))
-        #except StopIteration:
-        #    Interact.talk('Shh! The game is in progress, {}!'.format(name))
         #    return
         Interact.newroom({'name': Interact.options['roomName'], 'unlisted': Interact.options['unlisted']})
         Bot.onCommand(name, '!becomespec', [])
@@ -772,6 +806,7 @@ SOURCE: https://github.com/Oderjunkie/mafiaggbot/blob/main/main.py
         Interact.talk('{}? What?'.format(command[1:]))
         
 def parsepacket(packet: dict, cookies: dict, bot: typing.Any):
+    global make
     if packet['type']=='chat':
         name = '???'
         if packet['from']['model'] == 'user':
@@ -782,9 +817,9 @@ def parsepacket(packet: dict, cookies: dict, bot: typing.Any):
         if filtered!=None:
             bot.onCommand(name, filtered[0], filtered[1:])
         #print('{}: {}'.format(packet['message']))
-    if packet['type']=='newGame':
-        global make
-        make = mafiaConnectionold(packet['roomId'], make.userId, currentcookie)
+    elif packet['type']=='newGame':
+        make = mafiaConnectionold(packet['roomId'], make.userId, currentcookie, True)
+        make2 = mafiaConnectionold(packet['roomId'], make.userId, currentcookie, False)
     #if packet['type']=='chat':
     #    if packet['from']['model'] == 'player':
     #        i = packet['from']['playerId']
@@ -794,8 +829,8 @@ def parsepacket(packet: dict, cookies: dict, bot: typing.Any):
     #        i = finddude(i)
     #        t = 'U'
     #    print('[{}] {} {}: {}'.format(t, convert(packet['timestamp']), i, packet['message']))
-    #elif packet['type']=='system':
-    #    print('{} {}'.format(convert(packet['timestamp']), packet['message']))
+    elif packet['type']=='system':
+        print('{} {}'.format(convert(packet['timestamp']), packet['message']))
     #elif packet['type']=='decision':
     #    try:
     #        if 'targetPlayerId' in packet['details'].keys():
@@ -804,10 +839,19 @@ def parsepacket(packet: dict, cookies: dict, bot: typing.Any):
     #            print('{} {} {}'.format(convert(packet['timestamp']), packet['details']['playerId'], packet['details']['text']))
     #    except Exception:
     #        print(packet)
+    elif packet['type']=='userJoin':
+        gui.playerAdd(finddude(packet['userId']))
+    elif packet['type']=='userQuit':
+        gui.playerRemove(finddude(packet['userId']))
+    elif packet['type']=='endGame':
+        print('GAME HAS ENDED')
+        Interact.playing = False
     #else:
         #print(packet)
         #pass
 def debug(cli: typing.Any, cookies: dict):
+    for event in make.info['events']:
+        parsepacketsimple(event, True)
     import time
     Interact.talk('Hello, World!')
     time.sleep(0.01)
@@ -879,6 +923,7 @@ class App():
         self.filter = False
         print('Filter disabled')
     def playerAdd(self, name):
+        print('Added')
         if name not in self.playerslist.get(0, tk.END):
             self.playerslist.insert(tk.END, name)
     def playerRemove(self, name):
