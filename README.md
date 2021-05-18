@@ -10,7 +10,7 @@ scroll to the bottom.
 |https://mafia.gg/api/user-session|{login, password}|{id: USERID, username: USERNAME, email: EMAIL, hostBannedUsernames: [???], isPatreonLinked: true/false, activePatreon: true/false, needsVerification: true/false, createdAt: 'yyyy-mm-ddThh:mm:ss:pppZ'}|used to login to an account, use the cookies|
 |https://mafia.gg/api/rooms||[{id: ROOMID, name: ROOMNAME, hasStarted: true/false, playerCount: int, setupSize: 12, hostUser: {id: USERID, username: USERNAME, activepatreon: true/false, createdAt: 'yyyy-mm-ddThh:mm:ss:pppZ'}, createdAt: 'yyyy-mm-ddThh:mm:ss:pppZ'}]|get list of all rooms|
 |https://mafia.gg/api/rooms/ROOMID||{engineUrl: URL, auth: AUTH}|get data about specific room, URL is the engine url, AUTH is the authentication token|
-||
+|https://mafia.gg/api/rooms/ROOMID/kick|{userId: USERID}||kick specific user from room|
 |https://mafia.gg/api/users/USERID||{id: USERID, username: USERNAME, activepatreon: true/false, createdAt: 'yyyy-mm-ddThh:mm:ss:pppZ'}|get data about specific user, specifically id, username, activePatreon, createdAt|
 |https://mafia.gg/api/decks?filter&page=PAGENUM||{pagination: {page: PAGENUM, numPages: 12, total: 290}, decks: [{name: DECKNAME, version: VERSION, key: DECKID, builtin: true/false, deckSize: int, uploadTimestamp: UNIXTIMESTAMP, sampleCharacters: [{playerId: int, name: str, avatarUrl: str, backgroundColor: '#rrggbb'}]}]}|get data about all decks on specific page|
 |https://mafia.gg/api/decks/DECKID||{name: DECKNAME, version: VERSION,key: DECKID, builtin: true/false, deckSize: int, uploadTimestamp: UNIXTIMESTAMP, characters: [{playerId: PLAYERID, name: str, avatarUrl: str, backgroundColor: '#rrggbb'}]}|get data about a specific deck|
@@ -36,6 +36,7 @@ scroll to the bottom.
 |death|{playerId: PLAYERID, timestamp: UNIXTIMESTAMP}||death|
 |userJoin|{userId: USERID, timestamp: UNIXTIMESTAMP}||a user joining|
 |userQuit|{userId: USERID, timestamp: UNIXTIMESTAMP}||a user exiting|
+|transferHost||{userid: USERID}|transfer host to specific player|
 #### explanation of some types
 |type|format|usage|
 |----|------|-----|
@@ -50,6 +51,12 @@ scroll to the bottom.
 |ROLES|object|{ROLEID: ROLEAMO, ROLEID: ROLEAMO, ....}|
 |ROLEID|str|the id of a role, found in a setup code|
 |ROLEAMO|str|amount of times a role appears, capped to 99 by the mafia.gg GUI, if it goes over, shows as the last number below 99|
+#### room options quirks
+|key|api values|gui values|
+|---|----------|----------|
+|dayStart|off, dayStart, dawnStart|off, uninformed, informed|
+|deck|-1|no deck|
+|majorityRule|-1, 51|no majority, simple majority|
 ## reverse engineering
 ### process
 #### api
