@@ -14,7 +14,10 @@ scroll to the bottom.
 |https://mafia.gg/api/users/USERID||{id: USERID, username: USERNAME, activepatreon: true/false, createdAt: 'yyyy-mm-ddThh:mm:ss:pppZ'}|get data about specific user, specifically id, username, activePatreon, createdAt|
 |https://mafia.gg/api/decks?filter&page=PAGENUM||{pagination: {page: PAGENUM, numPages: 12, total: 290}, decks: [{name: DECKNAME, version: VERSION, key: DECKID, builtin: true/false, deckSize: int, uploadTimestamp: UNIXTIMESTAMP, sampleCharacters: [{playerId: int, name: str, avatarUrl: str, backgroundColor: '#rrggbb'}]}]}|get data about all decks on specific page|
 |https://mafia.gg/api/decks/DECKID||{name: DECKNAME, version: VERSION,key: DECKID, builtin: true/false, deckSize: int, uploadTimestamp: UNIXTIMESTAMP, characters: [{playerId: PLAYERID, name: str, avatarUrl: str, backgroundColor: '#rrggbb'}]}|get data about a specific deck|
-
+### black sheep api calls
+|url|request type|data|usage|
+|---|------------|----|-----|
+|https://mafia.gg/api/user|PATCH|{email: EMAILADDR, timeFormat: 'time'/???, hostBannedUsernames: [USERNAME], password: str, passwordConfirmation: str, patreonCode: null/???, }|the settings changed by [this page](https://mafia.gg/account)|
 ### websocket packets documentation
 ???s are the parts i haven't figured out yet.
 |type|data (from server)|data (to server)|usage|
