@@ -3,6 +3,7 @@ mafia.gg bot
 ## plans
 - [COMPLETED] add tkinter ui on a different thread than the api fetch bot thing \[async threading sucks btw\]
 ## reverse engineering
+### process
 scroll to the bottom.
 ### api documentation
 |url|post data|get data|usage|
