@@ -40,6 +40,7 @@ scroll to the bottom.
 |userJoin|{userId: USERID, timestamp: UNIXTIMESTAMP}||a user joining|
 |userQuit|{userId: USERID, timestamp: UNIXTIMESTAMP}||a user exiting|
 |transferHost||{userid: USERID}|transfer host to specific player|
+|endGame||{roles: {PLAYERID (int): ROLEID (int)}, sid: ?, timestamp: UNIXTIMESTAMP, users: {USERID (int): PLAYERID (str)}}|marks the end of a game, shows who was who bc of decks, and shows everyone's roles|
 #### explanation of some types
 |type|format|usage|
 |----|------|-----|
