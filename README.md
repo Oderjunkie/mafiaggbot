@@ -68,7 +68,7 @@ scroll to the bottom.
 #### api
 open up chrome devtools using F12, use Ctrl+F5 to refresh the page and cache, go into the devtools and click on network, you should see something like this:
 ![image](https://user-images.githubusercontent.com/58880677/118372522-b7f89c00-b5ba-11eb-99d3-68421c12be0f.png)
-right now, the only thing that you should be looking at is that "rooms" request, click on it and you'll see
+right now, the only requests that you should be looking at are all the requests labeled "xhr", one of them is the "rooms" request, click on it and you'll see
 ![image](https://user-images.githubusercontent.com/58880677/118372556-f4c49300-b5ba-11eb-83d0-b98ade32d263.png)
 you can ignore the general and response headers sections, look at the request headers (in this case you can ignore it, but thats the exception to the rule,) another thing you should look at is the response, click preview
 ![image](https://user-images.githubusercontent.com/58880677/118372624-55ec6680-b5bb-11eb-9432-609304fbd944.png)
@@ -76,7 +76,7 @@ as you can see, those are all the rooms you can see on the page, in json format!
 #### websocket packets
 same as with api, but you must enter a game first, and you'll see this:
 ![image](https://user-images.githubusercontent.com/58880677/118372703-9c41c580-b5bb-11eb-8368-dc5a2dfeff37.png)
-the "engine" request is the only important thing here. click on it.
+the "engine" request is the only important thing here, this applies to all websocket packets here. click on it.
 
 you can ignore the headers for all websocket packets, just click on messages and you'll see this:
 ![image](https://user-images.githubusercontent.com/58880677/118372763-d14e1800-b5bb-11eb-96d5-7cfdda611b4e.png)
