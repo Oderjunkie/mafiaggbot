@@ -1,5 +1,15 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
+
+import configuration as cf
+import tkinter.ttk as ttk
+import requests as rq
+import tkinter as tk
+import threading
+import asyncio
+import typing
+import time
+
 from urllib.parse import unquote as unurl
 from bs4 import BeautifulSoup as bs4
 from ttkthemes import ThemedTk
@@ -7,17 +17,10 @@ from websockets import connect
 from json import loads, dumps
 from datetime import datetime
 from random import choice
-import tkinter.ttk as ttk
-import requests as rq
 from sys import exit
-import tkinter as tk
-import threading
-import asyncio
-import typing
-import time
 
-username, password, room = 'hackfate', 'REDACTED', None # no pass 4 u
-auth = [username, 'Otesunkie'] # bot acc first, main acc for host second, then alts for host, then other people given auth.
+#username, password, room = 'hackfate', 'REDACTED', None # no pass 4 u
+#auth = [username, 'Otesunkie'] # bot acc first, main acc for host second, then alts for host, then other people given auth.
 
 def convert(unix):
     time = datetime.fromtimestamp(unix)
@@ -30,13 +33,13 @@ def find(func, arr):
     except StopIteration:
         return None
 #roomId = 'ff78d176-b4d9-4816-b9c4-16fc660780ef'
-tmp = rq.post('https://mafia.gg/api/user-session', json={'login': username, 'password': password})
+tmp = rq.post('https://mafia.gg/api/user-session', json={'login': cf.USERNAME, 'password': cf.PASSWORD})
 userresponse = loads(tmp.text)
 currentcookie = tmp.cookies.get_dict()
 del tmp
 
-from functools import lru_cache
-@lru_cache(maxsize=128)
+usersLUT = {}
+
 def finddude(i: int) -> str:
     """finddude(id)
 
@@ -51,7 +54,15 @@ def finddude(i: int) -> str:
     -------
     username : str
         The username."""
-    return loads(rq.get('https://mafia.gg/api/users/{}'.format(i)).content)[0]['username']
+    if i not in usersLUT:
+        usersLUT[i] = loads(rq.get('https://mafia.gg/api/users/{}'.format(i)).content)[0]['username']
+    print(i, '->', usersLUT[i])
+    return usersLUT[i]
+
+def findid(name: str) -> int:
+    back = list(usersLUT.keys())[list(usersLUT.values()).index(name)]
+    print(name, '->', back)
+    return back
 
 def parsepacketsimple(packet: dict, parsing: bool):
     if not packet:
@@ -78,16 +89,16 @@ class Interact:
                 'hostRoleSelection': False, 'majorityRule': '51',
                 'mustVote': False, 'nightLength': 1, 'noNightTalk': False,
                 'revealSetting': 'allReveal', 'roles': {},
-                'roomName': 'The Self-hosting server. V5.0', 'scaleTimer': True, 'twoKp': '0',
-                'type': 'options', 'unlisted': True}
+                'roomName': cf.ROOMNAME, 'scaleTimer': True, 'twoKp': '0',
+                'type': 'options', 'unlisted': cf.UNLISTED}
     options = {'dayLength': 3, 'dayStart': 'off',
                'deadlockPreventionLimit': '-1', 'deck': '-1',
                'disableVoteLock': False, 'hideSetup': False,
                'hostRoleSelection': False, 'majorityRule': '51',
                'mustVote': False, 'nightLength': 1, 'noNightTalk': False,
                'revealSetting': 'allReveal', 'roles': {},
-               'roomName': 'The Self-hosting server. V5.0', 'scaleTimer': True, 'twoKp': '0',
-               'type': 'options', 'unlisted': True}
+               'roomName': cf.ROOMNAME, 'scaleTimer': True, 'twoKp': '0',
+               'type': 'options', 'unlisted': cf.UNLISTED}
     def talk(msg: str):
         """talk(msg)
         
@@ -150,6 +161,10 @@ class Interact:
         if key=='majorityRule':
             if val.lower()=='simple':
                 val = '51'
+            elif val.lower()=='2/3':
+                val = '66'
+            elif val.lower()=='3/4':
+                val = '75'
             elif val.lower()=='off':
                 val = '-1'
         Interact.undoopts = Interact.options
@@ -220,7 +235,8 @@ class Interact:
         make.sendpacket({'type': 'newGame', 'roomId': room})
         make = mafiaConnectionold(room, make.userId, currentcookie, True)
         make2 = mafiaConnectionold(room, make.userId, currentcookie, False)
-        Interact.options = next(filter(lambda x:x['type']=='options', make.info['events'][::-1]))
+        #Interact.options = next(filter(lambda x:x['type']=='options', make.info['events'][::-1]))
+        Interact.refresh()
         sleep(1)
         Interact.talk('Hello, World!')
         sleep(1)
@@ -229,13 +245,15 @@ class Interact:
         except Exception:
             pass
         try:
-            Bot.onCommand(auth[0], '!help', [])
+            Bot.onCommand(cf.AUTH[0], '!help', [])
         except Exception:
             pass
     def newroomat(roomid: str):
         make.sendpacket({'type': 'newGame', 'roomId': roomid})
+        #tmp = Interact.options
         make = mafiaConnectionold(roomid, make.userId, currentcookie, True)
         make2 = mafiaConnectionold(roomid, make.userId, currentcookie, False)
+        #Interact.options = tmp
     def forcespec():
         """forcespec()
 
@@ -251,6 +269,17 @@ class Interact:
 
         Makes the bot a spectator."""
         make.sendpacket({'type': 'presence', 'isPlayer': False})
+    def kick(iD: int):
+        """kick()
+
+        Kicks player.
+
+        Parameters
+        ----------
+        id : int
+            The id of the player."""
+        print('KICKING', iD)
+        rq.post('https://mafia.gg/api/rooms/{}/kick'.format(make.roomId), json={'userId': iD})
 
 # q&a
 # q: you should add X!
@@ -278,7 +307,8 @@ class mafiaConnectionold:
             except:
                 print(rq.get('https://mafia.gg/api/rooms/{}'.format(self.roomId), cookies=cookies).content)
                 exit()
-            #print(self.settings)
+            if self.settings=={'error': 'notFound'}:
+                raise RuntimeError('Room not found!')
             self.ws = await connect(self.settings['engineUrl'], ssl=True) # 'wss://echo.websocket.org/'    self.settings['engineUrl']   , sslopt={'cert_reqs': ssl.CERT_NONE}
             #print(self.ws)
             output = dumps({'type':'clientHandshake', 'userId':userId, 'roomId':roomId, 'auth': self.settings['auth']})
@@ -347,6 +377,7 @@ class mafiaConnectionold:
         return self.eventloop.run_until_complete(self.ws.close())
 print('Preparing...')
 #make = mafiaConnectionold(roomid, userresponse['id'], currentcookie)
+room = cf.ROOM
 if not room:
     room = loads(rq.post('https://mafia.gg/api/rooms', json={'name': Interact.options['roomName'], 'unlisted': Interact.options['unlisted']}, cookies=currentcookie).content)['id']
 
@@ -413,9 +444,10 @@ class Cache:
 class Bot:
     """In order for me to recognise what you want me to do, you must type the command, followed by the arguments seperated by spaces.
 !help [command WITHOUT exclamation point] - I will explain the command..
-Commands: !say, !setup, !setupnamed, !start, !new, !afk, !random, !randomstrange, !unlist, !relist, !option, !deck, !hello, !cat, !dog, !keepalive, !help, !add, !rem, !undo.
-Host Commands: !becomeplayer, !becomespec, !refresh.
+Commands: !say, !setup, !setupnamed, !start, !new, !afk, !random, !randomstrange, !unlist, !relist, !option, !deck, !hello, !cat, !dog, !keepalive, !help, !add, !rem, !undo, !suggest.
+Host Commands: !becomeplayer, !becomespec, !refresh, !kick.
 SOURCE: https://github.com/Oderjunkie/mafiaggbot/blob/main/main.py
+NOTE: IF YOU HAVE A SUGGESTION, USE !SUGGEST!!!
 !say [message] - I shall say what you want! no offensive stuff please. NOTE: The message CAN have spaces.
 !setup [code]? - I will change the setup to the code you provide. If you provide no code, I will choose a random setup.
 !setupnamed [name]? - I will change the setup to the one you provide. If you provide nothing, I will choose a random setup.
@@ -440,7 +472,12 @@ SOURCE: https://github.com/Oderjunkie/mafiaggbot/blob/main/main.py
 !add [amo] [role] - I add the role amo times.
 !rem [amo] [role] - I remove the role amo times.
 !rename - ONLY FOR HOST, will rename server.
-!undo - I shall undo the last action
+!undo - I shall undo the last action.
+!sus - WHY MEEEE!?
+!suggest - I will suggest a command to the host.
+!cookie - \U0001F36A.
+!kick - ....and he's gone.
+!nodeck - I shall get rid of the deck entirely.
 !help - You did it!"""
     def thank(name: str) -> str:
         if name=='moontree':
@@ -448,6 +485,8 @@ SOURCE: https://github.com/Oderjunkie/mafiaggbot/blob/main/main.py
         return 'Thank you {}!'.format(name)
     def filterCommand(text: str) -> str:
         if text.startswith('!'):
+            if text.split(' ')[0]=='!':
+                return ['!help', '']
             return text.split(' ')
         elif text.lower().lstrip() in ['hello', 'hey', 'hi', 'good morning', 'good evening', 'sup', 'yo', 'heya']:
             return ['!hello']
@@ -455,6 +494,8 @@ SOURCE: https://github.com/Oderjunkie/mafiaggbot/blob/main/main.py
             return ['!dog']
         elif text.lower().lstrip() == 'meow':
             return ['!cat']
+        elif text.lower().lstrip() == 'sus':
+            return ['!sus']
         elif text.lower().lstrip() in ['buck', 'bock']:
             return ['!chicken']
         #elif text.lower().lstrip().startswith('mo'):
@@ -473,6 +514,12 @@ SOURCE: https://github.com/Oderjunkie/mafiaggbot/blob/main/main.py
         bare = command.lower().strip()[1:]
         if Bot.owodetect(bare):
             return
+        if cf.AUTHREQ:
+            if (name not in cf.AUTH):
+                if bare not in ['say', 'celebrate']:
+                    #getattr(Bot, 'on_say'.format(bare))('hackfate', 'Sorry {}, you\'re not {}!'.format(name, cf.AUTH[1]))
+                    Interact.talk('Sorry {}, you\'re not {}!'.format(name, cf.AUTH[1]))
+                return
         try:
             getattr(Bot, 'on_{}'.format(bare))(name, args)
         except AttributeError:
@@ -482,11 +529,21 @@ SOURCE: https://github.com/Oderjunkie/mafiaggbot/blob/main/main.py
             Interact.talk('DON\'T try to make that joke.')
             return True
         return False
+    def on_cookie(name: str, args: typing.List[str]):
+        if len(args)>0:
+            Interact.talk('   '.join(['\U0001F36A ------- {}'.format(arg) for arg in args]))
+        else:
+            Interact.talk('\U0001F36A ------- {}'.format(name))
+    def on_sus(name: str, args: typing.List[str]):
+        Interact.talk('why meeee ;-;')
     def on_newat(name: str, args: typing.List[str]):
-        if name not in auth:
-            Interact.talk('Sorry {}, You\'re not {}!'.format(name, auth[1]))
+        if name not in cf.AUTH:
+            Interact.talk('Sorry {}, You\'re not {}!'.format(name, cf.AUTH[1]))
             return
         Interact.newroomat(args[0])
+    def on_suggest(name: str, args: typing.List[str]):
+        with open('suggestions.txt', 'a') as f:
+            f.write('{} suggests: "{}".\n'.format(name, ' '.join(args)))
     def on_dog(name: str, args: typing.List[str]):
         word = choice('Woof!|Bark!'.split('|'))
         emoticon = choice('=3 <3 =D =) :3 :D :) \'-\' ^_^ ^__^'.split(' '))
@@ -515,7 +572,7 @@ SOURCE: https://github.com/Oderjunkie/mafiaggbot/blob/main/main.py
                 Interact.talk('That command does not exist!')
         else:
             from time import sleep
-            for line in Bot.__doc__.split('\n')[:5]:
+            for line in Bot.__doc__.split('\n')[:6]:
                 Interact.talk(line)
                 sleep(1.7)
     def on_option(name: str, args: typing.List[str]):
@@ -542,7 +599,7 @@ SOURCE: https://github.com/Oderjunkie/mafiaggbot/blob/main/main.py
             Interact.talk('Server cheats deactivated.')
     def on_say(name: str, args: typing.List[str]):
         msg = ' '.join(args)
-        if len(msg)>50 and name not in auth:
+        if len(msg)>50 and name not in cf.AUTH:
             Interact.talk('Too long!')
         else:
             Interact.talk(msg)
@@ -606,17 +663,23 @@ SOURCE: https://github.com/Oderjunkie/mafiaggbot/blob/main/main.py
             newamo = str(newamo)
             Interact.setup({'roles': {**Interact.options['roles'], roleid: newamo}})
     def on_unlist(name: str, args: typing.List[str]):
-        if name not in auth:
-            Interact.talk('Sorry {}, You\'re not {}!'.format(name, auth[1]))
+        if name not in cf.AUTH:
+            Interact.talk('Sorry {}, You\'re not {}!'.format(name, cf.AUTH[1]))
             return
         if Interact.options['unlisted']:
             Interact.talk('Server is already unlisted, {}!'.format(name))
         else:
             Interact.setup({'unlisted': True})
             Interact.talk('Unlisted server, {}'.format(Bot.thank(name)))
+    def on_kick(name: str, args: typing.List[str]):
+        if name not in cf.AUTH:
+            Interact.talk('Sorry {}, You\'re not {}!'.format(name, cf.AUTH[1]))
+            return
+        Interact.kick(findid(' '.join(args)))
+        Interact.talk('Kicked {}.'.format(' '.join(args)))
     def on_relist(name: str, args: typing.List[str]):
-        if name not in auth:
-            Interact.talk('Sorry {}, You\'re not {}!'.format(name, auth[1]))
+        if name not in cf.AUTH:
+            Interact.talk('Sorry {}, You\'re not {}!'.format(name, cf.AUTH[1]))
             return
         if not Interact.options['unlisted']:
             Interact.talk('Server is already listed, {}!'.format(name))
@@ -626,7 +689,7 @@ SOURCE: https://github.com/Oderjunkie/mafiaggbot/blob/main/main.py
     def on_celebrate(name: str, args: typing.List[str]):
         if len(args)>0:
             name = ' '.join(args)
-        Bot.onCommand(auth[0], '!say', ['Congratulations {}!'.format(name)])
+        Bot.onCommand(cf.AUTH[0], '!say', ['Congratulations {}!'.format(name)])
     #elif command=='!rename':
     #    if len(args)>0:
     #        pass
@@ -762,7 +825,7 @@ SOURCE: https://github.com/Oderjunkie/mafiaggbot/blob/main/main.py
         #    Interact.newroom(args[0])
         #else:
         #    Interact.newroom()
-        if len(args)>0 and name in auth:
+        if len(args)>0 and name in cf.AUTH:
             Interact.newroom({'name': args[0], 'unlisted': Interact.options['unlisted']})
         #else:
         #try:
@@ -776,17 +839,19 @@ SOURCE: https://github.com/Oderjunkie/mafiaggbot/blob/main/main.py
         Interact.talk('AFK CHECK!')
         Interact.forcespec()
     def on_becomeplayer(name: str, args: typing.List[str]):
-        if name in auth:
+        if name in cf.AUTH:
             Interact.becomeplayer()
         else:
-            Interact.talk('Sorry {}, You\'re not {}!'.format(name, auth[1]))
+            Interact.talk('Sorry {}, You\'re not {}!'.format(name, cf.AUTH[1]))
     def on_becomespec(name: str, args: typing.List[str]):
-        if name in auth:
+        if name in cf.AUTH:
             Interact.becomespec()
         else:
-            Interact.talk('Sorry {}, You\'re not {}!'.format(name, auth[1]))
+            Interact.talk('Sorry {}, You\'re not {}!'.format(name, cf.AUTH[1]))
+    def on_nodeck(name: str, args: typing.List[str]):
+        Bot.onCommand(name, '!option deck -1', [])
     def on_refresh(name: str, args: typing.List[str]):
-        if name in auth:
+        if name in cf.AUTH:
             from time import sleep
             Bot.onCommand(name, '!afk', [])
             Bot.onCommand(name, '!becomeplayer', [])
@@ -796,12 +861,12 @@ SOURCE: https://github.com/Oderjunkie/mafiaggbot/blob/main/main.py
             #Bot.onCommand(name, '!undo', [])
             Interact.refresh()
         else:
-            Interact.talk('Sorry {}, You\'re not {}!'.format(name, auth[1]))
+            Interact.talk('Sorry {}, You\'re not {}!'.format(name, cf.AUTH[1]))
     def on_rename(name: str, args: typing.List[str]):
-        if name in auth:
+        if name in cf.AUTH:
             Interact.setup({'roomName': ' '.join(args)})
         else:
-            Interact.talk('Sorry {}, You\'re not {}!'.format(name, auth[1]))
+            Interact.talk('Sorry {}, You\'re not {}!'.format(name, cf.AUTH[1]))
     def on__(name: str, command: str, args: typing.List[str]):
         Interact.talk('{}? What?'.format(command[1:]))
         
@@ -853,9 +918,9 @@ def debug(cli: typing.Any, cookies: dict):
     for event in make.info['events']:
         parsepacketsimple(event, True)
     import time
-    Interact.talk('Hello, World!')
+    #Interact.talk('Hello, World!')
     time.sleep(0.01)
-    Bot.onCommand(auth[0], '!help', [])
+    #Bot.onCommand(cf.AUTH[0], '!help', [])
     while True:
         try:
             time.sleep(0.01)
