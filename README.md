@@ -15,7 +15,7 @@ scroll to the bottom.
 |https://mafia.gg/api/rooms/ROOMID/kick|{userId: USERID}||kick specific user from room|
 |https://mafia.gg/api/users/USERID||{id: USERID, username: USERNAME, activepatreon: true/false, createdAt: 'yyyy-mm-ddThh:mm:ss:pppZ', ?type: 'admin'}|get data about specific user, specifically id, username, activePatreon, createdAt|
 |https://mafia.gg/api/decks?filter&page=PAGENUM||{pagination: {page: PAGENUM, numPages: 12, total: 290}, decks: [{name: DECKNAME, version: VERSION, key: DECKID, builtin: true/false, deckSize: int, uploadTimestamp: UNIXTIMESTAMP, sampleCharacters: [{playerId: int, name: str, avatarUrl: str, backgroundColor: '#rrggbb'}]}]}|get data about all decks on specific page|
-|https://mafia.gg/api/decks/DECKID||{name: DECKNAME, version: VERSION,key: DECKID, builtin: true/false, deckSize: int, uploadTimestamp: UNIXTIMESTAMP, characters: [{playerId: PLAYERID, name: str, avatarUrl: str, backgroundColor: '#rrggbb'}]}|get data about a specific deck|
+|https://mafia.gg/api/decks/DECKID||{name: DECKNAME, version: VERSION, key: DECKID, builtin: true/false, deckSize: int, uploadTimestamp: MILLIUNIXTIMESTAMP, characters: [{playerId: PLAYERID, name: str, avatarUrl: str, backgroundColor: '#rrggbb'}]}|get data about a specific deck|
 ### black sheep api calls
 |url|request type|data|usage|
 |---|------------|----|-----|
@@ -50,7 +50,8 @@ scroll to the bottom.
 |USERID|str|use with the users api to find name|
 |PLAYERID|str|use the decks api, and find the card with the playerid|
 |ROOMID|str|use with the rooms api|
-|UNIXTIMESTAMP|int|the unix time stamp|
+|UNIXTIMESTAMP|int|the unix time stamp, in seconds|
+|MILLIUNIXTIMESTAMP|int|the unix time stamp, in milliseconds|
 |MESSAGE|str|a message|
 |ROOMNAME|str|the name of a room|
 |TOPIC|str|the topic of a room|
