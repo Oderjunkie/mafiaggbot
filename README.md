@@ -3,6 +3,10 @@ mafia.gg bot
 ## plans
 - [COMPLETED] add tkinter ui on a different thread than the api fetch bot thing \[async threading sucks btw\]
 - if you are a hacker, and care at all about this, i need to know if i can edit the engineUrl key of the https://mafia.gg/api/rooms/ROOMID api. if that is possible, i can do some crazy stuff.
+## discord
+but why
+
+why would you want a dis- [BEEP](https://discord.gg/gQ2j78mYdD)
 ## reverse engineering
 ### process
 scroll to the bottom.
@@ -83,7 +87,3 @@ the "engine" request is the only important thing here, this applies to all webso
 you can ignore the headers for all websocket packets, just click on messages and you'll see this:
 ![image](https://user-images.githubusercontent.com/58880677/118372763-d14e1800-b5bb-11eb-96d5-7cfdda611b4e.png)
 each of these rows is a different packet: red arrows pointing down are the packets from the server, to the client; green arrows pointing up are the packets from the client, to the server.
-### discord
-but why
-
-why would you want a dis- [BEEP](https://discord.gg/gQ2j78mYdD)
