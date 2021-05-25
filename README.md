@@ -31,9 +31,9 @@ scroll to the bottom.
 |ping|||client -> server|
 |pong|{timestamp: UNIXTIMESTAMP, sid: ?}||server -> client|
 |chat|{message: MESSAGE, from: {model: 'user'/'player', userid: USERID/0, playerid: PLAYERID}}|{message: MESSAGE}|send message through the chatroom|
-|newgame|{roomId: ROOMID}|SAME AS FROM SERVER|create a new room|
+|newGame|{roomId: ROOMID}|SAME AS FROM SERVER|create a new room|
 |options|{dayLength: 1-9, dayStart: 'off'/'dawnStart'/'dayStart', deadlockPreventionLimit: '-1'/???, deck: '-1'/DECKID, disableVoteLock: true/false, hideSetup: true/false, hostRoleSelection: true/false, majorityRule: '-1'/'51'/???, mustVote: true/false, nightLength: 1-9, noNightTalk: true/false, revealSetting: 'allReveal'/???, roles: ROLES, roomName: ROOMNAME, scaleTimer: true/false, twoKp: '0'/???, unlisted: true/false|SAME AS FROM SERVER|set the options of the room|
-|startgame|||starts the game|
+|startGame|||starts the game|
 |decision|{details: {text: 'votes'/???, playerId: PLAYERID, targetPlayerId: PLAYERID, }, groupId: ???, id: ???, qid: ???, sid: ?, timestamp: UNIXTIMESTAMP}||voting AFAIK, prob more|
 |decisionGroup|{id: ???, kind: 'vote'/???, label: 'Condemn'/???, timestamp: UNIXTIMESTAMP}||the packet to make the tiny box appear on the screen|
 |alert|{timestamp: UNIXTIMESTAMP}||||
