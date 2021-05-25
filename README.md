@@ -6,6 +6,37 @@ mafia.gg bot
 but why
 
 why would you want a dis- [BEEP](https://discord.gg/gQ2j78mYdD)
+## how 2 hackfate
+you will need:
+- a mafia.gg account
+- a mongodb account
+
+in the mongodb acc make a new cluster
+
+click on connect
+
+click on use for application
+
+in dropdowns select python 3.8.6
+
+copy the url
+
+in the new cluster make a collection called "mafiagg"
+
+clone this repo
+
+edit config.py
+
+put your username
+
+put your password
+
+in MONGODB, put the url you copied earlier
+
+execute main.py
+
+you're done
+
 ## reverse engineering
 ### process
 scroll to the bottom.
