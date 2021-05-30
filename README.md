@@ -1,12 +1,42 @@
 # mafiaggbot
 mafia.gg bot
 ## plans
-- [COMPLETED] add tkinter ui on a different thread than the api fetch bot thing \[async threading sucks btw\]
 - if you are a hacker, and care at all about this, i need to know if i can edit the engineUrl key of the https://mafia.gg/api/rooms/ROOMID api. if that is possible, i can do some crazy stuff.
 ## discord
 but why
 
 why would you want a dis- [BEEP](https://discord.gg/gQ2j78mYdD)
+## how 2 hackfate
+you will need:
+- a mafia.gg account
+- a mongodb account
+
+in the mongodb acc make a new cluster
+
+click on connect
+
+click on use for application
+
+in dropdowns select python 3.8.6
+
+copy the url
+
+in the new cluster make a collection called "mafiagg"
+
+clone this repo
+
+edit config.py
+
+put your username
+
+put your password
+
+in MONGODB, put the url you copied earlier
+
+execute main.py
+
+you're done
+
 ## reverse engineering
 ### process
 scroll to the bottom.
@@ -32,9 +62,9 @@ scroll to the bottom.
 |ping|||client -> server|
 |pong|{timestamp: UNIXTIMESTAMP, sid: ?}||server -> client|
 |chat|{message: MESSAGE, from: {model: 'user'/'player', userid: USERID/0, playerid: PLAYERID}}|{message: MESSAGE}|send message through the chatroom|
-|newgame|{roomId: ROOMID}|SAME AS FROM SERVER|create a new room|
+|newGame|{roomId: ROOMID}|SAME AS FROM SERVER|create a new room|
 |options|{dayLength: 1-9, dayStart: 'off'/'dawnStart'/'dayStart', deadlockPreventionLimit: '-1'/???, deck: '-1'/DECKID, disableVoteLock: true/false, hideSetup: true/false, hostRoleSelection: true/false, majorityRule: '-1'/'51'/???, mustVote: true/false, nightLength: 1-9, noNightTalk: true/false, revealSetting: 'allReveal'/???, roles: ROLES, roomName: ROOMNAME, scaleTimer: true/false, twoKp: '0'/???, unlisted: true/false|SAME AS FROM SERVER|set the options of the room|
-|startgame|||starts the game|
+|startGame|||starts the game|
 |decision|{details: {text: 'votes'/???, playerId: PLAYERID, targetPlayerId: PLAYERID, }, groupId: ???, id: ???, qid: ???, sid: ?, timestamp: UNIXTIMESTAMP}||voting AFAIK, prob more|
 |decisionGroup|{id: ???, kind: 'vote'/???, label: 'Condemn'/???, timestamp: UNIXTIMESTAMP}||the packet to make the tiny box appear on the screen|
 |alert|{timestamp: UNIXTIMESTAMP}||||
