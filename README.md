@@ -1,7 +1,7 @@
 # mafiaggbot
 mafia.gg bot
 ## plans
-- if you are a hacker, and care at all about this, i need to know if i can edit the engineUrl key of the https://mafia.gg/api/rooms/ROOMID api. if that is possible, i can do some crazy stuff.
+- if you are a hacker/fuzzer, and care at all about this, i need to know if i can edit the engineUrl key of the https://mafia.gg/api/rooms/ROOMID api. if that is possible, i can do some crazy stuff.
 ## discord
 but why
 
