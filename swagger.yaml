@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Mafia.gg api
   description: none needed
-  version 0.1.9
+  version: 0.0.0
 
 servers:
   - url: https://mafia.gg/api
@@ -13,26 +13,160 @@ components:
       properties:
         id:
           type: integer
+          example: 286021
         username:
           type: string
+          example: Otesunkie
         email:
           type: string
           format: email
         timeFormat:
           type: string
+          example: time_24
         hostBannedUsernames:
           type: array
           items:
             type: string
         isPatreonLinked:
           type: boolean
+          example: false
         activePatreon:
           type: boolean
+          example: false
         needsVerification:
           type: boolean
+          example: false
         createdAt:
           type: string
-          format: date-time        
+          format: date-time
+          example: '2021-02-09T15:50:35.475Z'
+    User:
+      properties:
+        id:
+          type: integer
+          example: 34912
+        username:
+          type: string
+          example: livbender
+        activePatreon:
+          type: boolean
+          example: false
+        createdAt:
+          type: string
+          format: date-time
+          example: '2021-05-29T07:58:33.297Z'
+    Room:
+      properties:
+        id:
+          type: string
+          example: 'f9e7c1bd-97a7-4269-a5e9-8619a9c9d037'
+        name:
+          type: string
+          example: 'bacaboo room'
+        hasStarted:
+          type: boolean
+          example: true
+        playerCount:
+          type: integer
+          format: int32
+          example: 7
+        setupSize:
+          type: integer
+          format: int32
+          example: 7
+        hostUser:
+          $ref: '#/components/schemas/User'
+    RoomPointer:
+      properties:
+        engineUrl:
+          type: string
+          example: wss://mafia.gg:443/engine
+        auth:
+          type: string
+          format: byte
+          example: 7keJfcvsDuoYNsBLwJna1R66sb7GaGcUaO0Egde9RPg=
+    DeckCharacter:
+      properties:
+        playerId:
+          type: integer
+          example: 63
+        name:
+          type: string
+          example: Bengal Jack
+        avatarUrl:
+          type: string
+          example: /assets/decks/1590964743164/img-63.png
+        backgroundColor:
+          type: string
+          format: hexcolor
+          example: '#d6ad40'
+    Deck:
+      properties:
+        name:
+          type: string
+          example: Neko Atsume
+        version:
+          type: integer
+          example: 3
+        key:
+          type: string
+          example: 1590964743164
+        builtin:
+          type: boolean
+          example: false
+        deckSize:
+          type: integer
+          example: 46
+        uploadTimestamp:
+          type: integer
+          example: 1590964801791
+        characters:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeckCharacter'
+    SampleDeck:
+      properties:
+        name:
+          type: string
+          example: Neko Atsume
+        version:
+          type: integer
+          example: 3
+        key:
+          type: string
+          example: 1590964743164
+        builtin:
+          type: boolean
+          example: false
+        deckSize:
+          type: integer
+          example: 46
+        uploadTimestamp:
+          type: integer
+          example: 1590964801791
+        sampleCharacters:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeckCharacter'
+    DeckPointer:
+      properties:
+        pagination:
+          type: object
+          properties:
+            page:
+              type: integer
+              example: 1
+            numPages:
+              type: integer
+              example: 12
+            total:
+              type: integer
+              example: 290
+        decks:
+          type: array
+          items:
+            $ref: '#/components/schemas/SampleDeck'
+          
 
 paths:
   /user-session:
@@ -47,17 +181,217 @@ paths:
               properties:
                 login:
                   type: string
+                  example: Otesunkie
                 password:
                   type: string
                   format: password
-      resposes:
+                  example: REDACTED
+      responses:
         '200':
           description: Returns the user.
           content:
             application/json:
-              $ref: '#/components/schemas/SelfUser'
+              schema:
+                $ref: '#/components/schemas/SelfUser'
         '401':
           description: Wrong username or password.
           content:
             text/plain:
-              'Unauthorized'
+              example: 'Unauthorized'
+  /rooms:
+    get:
+      summary: Get list of all rooms.
+      responses:
+        '200':
+          description: The list of all rooms.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Room'
+        '401':
+          description: The client isn't logged in.
+          content:
+            text/plain:
+              example: 'Unauthorized'
+  /rooms/{roomId}:
+    get:
+      summary: Get pointer to specific room.
+      parameters:
+        - in: path
+          name: roomId
+          schema:
+            type: string
+          required: true
+          description: The RoomId of the room to get.
+          example: f9e7c1bd-97a7-4269-a5e9-8619a9c9d037
+      responses:
+        '200':
+          description: The info to connect to the room.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomPointer'
+        '401':
+          description: The client isn't logged in.
+          content:
+            text/plain:
+              example: 'Unauthorized'
+  /users/{userId}:
+    get:
+      summary: Get data about specific user.
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            type: string
+          required: true
+          description: The UserID of the user to get.
+          example: 34912
+      responses:
+        '200':
+          description: The data about the user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: The client isn't logged in.
+          content:
+            text/plain:
+              example: 'Unauthorized'
+  /user:
+    get:
+      summary: Get data about the current user.
+      responses:
+        '200':
+          description: The data about the current user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SelfUser'
+        '401':
+          description: The client isn't logged in.
+          content:
+            text/plain:
+              example: 'Unauthorized'
+    patch:
+      summary: Change data about the current user.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                hostBannedUsernames:
+                  type: array
+                  items:
+                    type: string
+                password:
+                  type: string
+                  format: password
+                  example: 'password'
+                passwordConfirmation:
+                  type: string
+                  format: password
+                  example: 'password'
+                patreonCode:
+                  type: string
+                  format: uri
+                  example: 'https://www.patreon.com/example'
+                  nullable: true
+                timeFormat:
+                  type: string
+                  example: 'time_24'
+      responses:
+        '200':
+          description: The data about the current user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SelfUser'
+        '422':
+          description: One or more of the pieces of data send was invalid.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: object
+                    properties:
+                      data.hostBannedUsernames[x]:
+                        type: string
+                        example: 'must be at least 4 characters'
+                      email:
+                        type: string
+                        example: 'is a required field'
+                      password:
+                        type: string
+                        example: 'must be at least 6 characters'
+                      passwordConfirmation:
+                        type: string
+                        example: 'must match password'
+        '401':
+          description: The client isn't logged in.
+          content:
+            text/plain:
+              example: 'Unauthorized'
+  /decks:
+    get:
+      summary: Get decks that match the query, on the specified page.
+      parameters:
+        - in: query
+          name: filter
+          schema:
+            type: string
+          required: false
+          description: The name to search for.
+          example: Neko Atsume
+        - in: query
+          name: page
+          schema:
+            type: string
+          required: false
+          description: The page number.
+          example: 1
+      responses:
+        '200':
+          description: The deck data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeckPointer'
+        '401':
+          description: The client isn't logged in.
+          content:
+            text/plain:
+              example: 'Unauthorized'
+  /deck/{deckId}:
+    get:
+      summary: Get data about specific deck.
+      parameters:
+        - in: path
+          name: deckId
+          schema:
+            type: string
+          required: true
+          description: The DeckID of the deck to get.
+          example: 1590964801791
+      responses:
+        '200':
+          description: The data about the deck.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Deck'
+        '401':
+          description: The client isn't logged in.
+          content:
+            text/plain:
+              example: 'Unauthorized'
