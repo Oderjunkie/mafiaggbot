@@ -43,7 +43,7 @@ scroll to the bottom.
 ### api documentation
 |url|post data|get data|usage|
 |---|---------|--------|-----|
-|https://mafia.gg/api/user-session|{login, password}|{id: USERID, username: USERNAME, email: EMAIL, hostBannedUsernames: [???], isPatreonLinked: true/false, activePatreon: true/false, needsVerification: true/false, createdAt: 'yyyy-mm-ddThh:mm:ss:pppZ'}|used to login to an account, use the cookies|
+|https://mafia.gg/api/user-session|{login: str, password: str}|{id: USERID, username: USERNAME, email: EMAIL, hostBannedUsernames: [???], isPatreonLinked: true/false, activePatreon: true/false, needsVerification: true/false, createdAt: 'yyyy-mm-ddThh:mm:ss:pppZ'}|used to login to an account, use the cookies|
 |https://mafia.gg/api/rooms||[{id: ROOMID, name: ROOMNAME, hasStarted: true/false, playerCount: int, setupSize: 12, hostUser: {id: USERID, username: USERNAME, activepatreon: true/false, createdAt: 'yyyy-mm-ddThh:mm:ss:pppZ'}, createdAt: 'yyyy-mm-ddThh:mm:ss:pppZ'}]|get list of all rooms|
 |https://mafia.gg/api/rooms/ROOMID||{engineUrl: URL, auth: AUTH}|get data about specific room, URL is the engine url, AUTH is the authentication token|
 |https://mafia.gg/api/rooms/ROOMID/kick|{userId: USERID}||kick specific user from room|
