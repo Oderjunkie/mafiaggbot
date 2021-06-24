@@ -60,12 +60,12 @@ scroll to the bottom.
 |----|------------------|----------------|-----|
 |clientHandshake|{events: [PACKET], possibleUserIds: [???], sid: ?, timestamp: UNIXTIMESTAMP, users: [{userId: USERID, isHost: ISHOST, isPlayer: ISPLAYER}]}|{userId: USERID, roomId: ROOMID, auth: AUTHTOKEN}|FIRST PACKET TO SEND, starts communication between client and server|
 |ping|||client -> server|
-|pong|{timestamp: UNIXTIMESTAMP, sid: ?}||server -> client|
-|chat|{message: MESSAGE, from: {model: 'user'/'player', userid: USERID/0, playerid: PLAYERID}}|{message: MESSAGE}|send message through the chatroom|
+|pong|{timestamp: UNIXTIMESTAMP, sid: SID}||server -> client|
+|chat|{message: MESSAGE, from: {model: 'user'/'player', userid: USERID/0, playerid: PLAYERID}, timestamp: UNIXTIMESTAMP, sid: SID}|{message: MESSAGE}|send message through the chatroom|
 |newGame|{roomId: ROOMID}|SAME AS FROM SERVER|create a new room|
 |options|{dayLength: 1-9, dayStart: 'off'/'dawnStart'/'dayStart', deadlockPreventionLimit: '-1'/???, deck: '-1'/DECKID, disableVoteLock: true/false, hideSetup: true/false, hostRoleSelection: true/false, majorityRule: '-1'/'51'/???, mustVote: true/false, nightLength: 1-9, noNightTalk: true/false, revealSetting: 'allReveal'/???, roles: ROLES, roomName: ROOMNAME, scaleTimer: true/false, twoKp: '0'/???, unlisted: true/false|SAME AS FROM SERVER|set the options of the room|
 |startGame|||starts the game|
-|decision|{details: {text: 'votes'/???, playerId: PLAYERID, targetPlayerId: PLAYERID, }, groupId: ???, id: ???, qid: ???, sid: ?, timestamp: UNIXTIMESTAMP}||voting AFAIK, prob more|
+|decision|{details: {text: 'votes'/???, playerId: PLAYERID, targetPlayerId: PLAYERID, }, groupId: ???, id: ???, qid: ???, sid: SID, timestamp: UNIXTIMESTAMP}||voting AFAIK, prob more|
 |decisionGroup|{id: ???, kind: 'vote'/???, label: 'Condemn'/???, timestamp: UNIXTIMESTAMP}||the packet to make the tiny box appear on the screen|
 |alert|{timestamp: UNIXTIMESTAMP}||||
 |system|{timestamp: UNIXTIMESTAMP, message: MESSAGE}||a message from the mafia game system to the client|
@@ -76,8 +76,8 @@ scroll to the bottom.
 |userJoin|{userId: USERID, timestamp: UNIXTIMESTAMP}||a user joining|
 |userQuit|{userId: USERID, timestamp: UNIXTIMESTAMP}||a user exiting|
 |transferHost||{userid: USERID}|transfer host to specific player|
-|endGame||{roles: {PLAYERID (int): ROLEID (int)}, sid: ?, timestamp: UNIXTIMESTAMP, users: {USERID (int): PLAYERID (str)}}|marks the end of a game, shows who was who bc of decks, and shows everyone's roles|
-|optionsSetup||{roles: ROLES, sid: ??, timestamp: UNIXTIMESTAMP}|purpose unknown to me|
+|endGame||{roles: {PLAYERID (int): ROLEID (int)}, sid: SID, timestamp: UNIXTIMESTAMP, users: {USERID (int): PLAYERID (str)}}|marks the end of a game, shows who was who bc of decks, and shows everyone's roles|
+|optionsSetup||{roles: ROLES, sid: SID, timestamp: UNIXTIMESTAMP}|purpose unknown to me|
 #### explanation of some types
 |type|format|usage|
 |----|------|-----|
@@ -93,6 +93,7 @@ scroll to the bottom.
 |ROLES|object|{ROLEID: ROLEAMO, ROLEID: ROLEAMO, ....}|
 |ROLEID|str|the id of a role, found in a setup code|
 |ROLEAMO|str|amount of times a role appears, capped to 99 by the mafia.gg GUI, if it goes over, shows as the last number below 99|
+|SID|int|this number MUST increase every time it is sent.|
 #### room options quirks
 |key|api values|gui values|
 |---|----------|----------|
