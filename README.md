@@ -73,8 +73,8 @@ scroll to the bottom.
 |timer|{end: UNIXTIMESTAMP, timestamp: UNIXTIMESTAMP, topic: TOPIC}||the topic is stuff like "Free period", "End-of-night buffer" and such|
 |quote|{qid: ???, timestamp: UNIXTIMESTAMP, from: {model: 'user'/'player', userId: USERID/0, playerId: PLAYERID}}||quotes in the chat|
 |death|{playerId: PLAYERID, timestamp: UNIXTIMESTAMP}||death|
-|userJoin|{userId: USERID, timestamp: UNIXTIMESTAMP}||a user joining|
-|userQuit|{userId: USERID, timestamp: UNIXTIMESTAMP}||a user exiting|
+|userJoin|{userId: USERID, isHost: bool, isPlayer: bool, timestamp: UNIXTIMESTAMP, sid: SID}||a user joining|
+|userQuit|{userId: USERID, timestamp: UNIXTIMESTAMP, sid: SID}||a user exiting|
 |transferHost||{userid: USERID}|transfer host to specific player|
 |endGame||{roles: {PLAYERID (int): ROLEID (int)}, sid: SID, timestamp: UNIXTIMESTAMP, users: {USERID (int): PLAYERID (str)}}|marks the end of a game, shows who was who bc of decks, and shows everyone's roles|
 |optionsSetup||{roles: ROLES, sid: SID, timestamp: UNIXTIMESTAMP}|purpose unknown to me|
