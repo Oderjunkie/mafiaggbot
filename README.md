@@ -1,7 +1,5 @@
 # mafiaggbot
 mafia.gg bot
-## plans
-- if you are a hacker/fuzzer, and care at all about this, i need to know if i can edit the engineUrl key of the https://mafia.gg/api/rooms/ROOMID api. if that is possible, i can do some crazy stuff.
 ## discord
 but why
 
@@ -11,30 +9,19 @@ you will need:
 - a mafia.gg account
 - a mongodb account
 
-in the mongodb acc make a new cluster
-
-click on connect
-
-click on use for application
-
-in dropdowns select python 3.8.6
-
-copy the url
-
-in the new cluster make a collection called "mafiagg"
-
-clone this repo
-
-edit config.py
-
-put your username
-
-put your password
-
-in MONGODB, put the url you copied earlier
-
-execute main.py
-
+in the mongodb acc make a new cluster<br/>
+click on connect<br/>
+click on use for application<br/>
+in dropdowns select python 3.8.6<br/>
+copy the url<br/>
+in the new cluster make a collection called "mafiagg"<br/>
+clone this repo<br/>
+execute `pip3 install mafapi`<br/>
+edit config.py<br/>
+put your username<br/>
+put your password<br/>
+in MONGODB, put the url you copied earlier<br/>
+execute main.py<br/>
 you're done
 
 ## reverse engineering
