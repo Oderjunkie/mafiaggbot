@@ -88,7 +88,9 @@ scroll to the bottom.
 |deck|-1|no deck|
 |majorityRule|-1, 51|no majority, simple majority|
 ## reverse engineering
-### process
+### automatic
+copy and paste [this script](https://gist.github.com/Oderjunkie/3a9dfb7dfd8b4046cf67ff8890f50abc) into chrome devtools, then do stuff while satching the console.
+### manual
 #### api
 open up chrome devtools using F12, use Ctrl+F5 to refresh the page and cache, go into the devtools and click on network, you should see something like this:
 ![image](https://user-images.githubusercontent.com/58880677/118372522-b7f89c00-b5ba-11eb-99d3-68421c12be0f.png)
